@@ -80,7 +80,7 @@ Curve evalBezier( const vector< Vector3f >& P, unsigned steps )
 		Vector3f b;
 		if(i == 0){
 			b = p.T;
-			b[0] += 1.0f;
+			b[2] += 1.0f;
 		}
 		else b = c[i - 1].B;
 		p.N = Vector3f::cross(b, p.T).normalized();
