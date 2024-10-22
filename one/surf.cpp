@@ -28,11 +28,17 @@ Surface makeSurfRev(const Curve &profile, unsigned steps)
         cerr << "surfRev profile curve must be flat on xy plane." << endl;
         exit(0);
     }
+	for(unsigned i = 0; i < 360; i++){
+		Matrix3f rotationMatrix = Matrix3f( cos(i), 0.0f, sin(i),
+											0.0f, 1.0f, 0.0f,
+											-sin(i), 0.0f, cos(i));
+		for(unsigned j = 0; j < profile.size(); j++){
+			surface.VV.push_back(rotationMatrix*profile[j].V);
+			surface.VN.push_back(-profile[j].N);
+		}
+	
+	}
 
-    // TODO: Here you should build the surface.  See surf.h for details.
-
-    cerr << "\t>>> makeSurfRev called (but not implemented).\n\t>>> Returning empty surface." << endl;
- 
     return surface;
 }
 
