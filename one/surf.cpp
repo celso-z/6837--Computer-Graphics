@@ -66,12 +66,38 @@ Surface makeGenCyl(const Curve &profile, const Curve &sweep )
         cerr << "genCyl profile curve must be flat on xy plane." << endl;
         exit(0);
     }
-	for(unsigned i = 0; i<profile.size(); i++){
-		//Vector3f a = Vector3f( profile[i].V[0] + sweep[0].V[0], profile[i].V[1] + sweep[0].V[1], profile[i].V[2] + sweep[0].V[2]);
-		//surface.VV.push_back(a);
-		cout << profile[i].V[0] << endl;
+	Matrix3f rotationMatrix = Matrix3f( 1.0f, 0.0f, 0.0f,
+										0.0f, cos(PI/2), -sin(PI/2),
+										0.0f, sin(PI/2), cos(PI/2));
+	for(unsigned i = 0; i < sweep.size(); i++){
+		Matrix4f transformationMatrix = Matrix4f( sweep[i].N[0], sweep[i].B[0], sweep[i].T[0], sweep[i].V[0],
+												sweep[i].N[1], sweep[i].B[1], sweep[i].T[1], sweep[i].V[1],
+												sweep[i].N[2], sweep[i].B[2], sweep[i].T[2], sweep[i].V[2],
+												0.0f, 0.0f, 0.0f, 1.0f);
+		for(unsigned j = 0; j<profile.size(); j++){
+			Matrix4f homogeneousMatrix = Matrix4f( -profile[j].N[0], profile[j].B[0], profile[j].T[0], profile[j].V[0],
+												-profile[j].N[1], profile[j].B[1], profile[j].T[1], profile[j].V[1],
+												-profile[j].N[2], profile[j].B[2], profile[j].T[2], profile[j].V[2],
+												0.0f, 0.0f, 0.0f, 1.0f);
+			Matrix4f resultingMatrix = transformationMatrix * homogeneousMatrix;
+			Vector3f b = resultingMatrix.getCol(0).xyz();
+			surface.VV.push_back(resultingMatrix.getCol(3).xyz());
+			surface.VN.push_back(b);
+			if(j > 0){
+				if(i == 0){
+					Tup3u c = Tup3u(((sweep.size()-1) * profile.size()) + (j - 1), ((sweep.size()-1)*profile.size())+j, j);
+					Tup3u d = Tup3u(c[0], c[2], c[2] - 1);
+					surface.VF.push_back(c);	
+					surface.VF.push_back(d);	
+				}else{
+					Tup3u a = Tup3u(((i-1) * profile.size()) + (j - 1), ((i-1)*profile.size())+j, (i * profile.size()) + j);
+					Tup3u b = Tup3u(a[0], a[2], a[2] - 1);
+					surface.VF.push_back(a);	
+					surface.VF.push_back(b);	
+				}
+			}
+		}
 	}
-
     // TODO: Here you should build the surface.  See surf.h for details.
 
     cerr << "\t>>> makeGenCyl called (but not implemented).\n\t>>> Returning empty surface." <<endl;
