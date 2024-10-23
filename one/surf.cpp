@@ -2,6 +2,8 @@
 #include "extra.h"
 using namespace std;
 
+#define PI 3.14159265
+
 namespace
 {
     
@@ -29,12 +31,25 @@ Surface makeSurfRev(const Curve &profile, unsigned steps)
         exit(0);
     }
 	for(unsigned i = 0; i < 360; i++){
-		Matrix3f rotationMatrix = Matrix3f( cos(i), 0.0f, sin(i),
+		Matrix3f rotationMatrix = Matrix3f( cos((i)*PI/180), 0.0f, sin((i)*PI/180),
 											0.0f, 1.0f, 0.0f,
-											-sin(i), 0.0f, cos(i));
+											-sin((i)*PI/180), 0.0f, cos((i)*PI/180));
 		for(unsigned j = 0; j < profile.size(); j++){
 			surface.VV.push_back(rotationMatrix*profile[j].V);
-			surface.VN.push_back(-profile[j].N);
+			surface.VN.push_back(rotationMatrix*(-profile[j].N));
+			if(j > 0){
+				if(i == 0){
+					Tup3u a = Tup3u(((359) * profile.size()) + (j - 1), ((359)*profile.size())+j, j);
+					Tup3u b = Tup3u(a[0], a[2], a[2] - 1);
+					surface.VF.push_back(a);	
+					surface.VF.push_back(b);	
+				}else{
+					Tup3u a = Tup3u(((i-1) * profile.size()) + (j - 1), ((i-1)*profile.size())+j, (i * profile.size()) + j);
+					Tup3u b = Tup3u(a[0], a[2], a[2] - 1);
+					surface.VF.push_back(a);	
+					surface.VF.push_back(b);	
+				}
+			}
 		}
 	
 	}
@@ -51,6 +66,11 @@ Surface makeGenCyl(const Curve &profile, const Curve &sweep )
         cerr << "genCyl profile curve must be flat on xy plane." << endl;
         exit(0);
     }
+	for(unsigned i = 0; i<profile.size(); i++){
+		//Vector3f a = Vector3f( profile[i].V[0] + sweep[0].V[0], profile[i].V[1] + sweep[0].V[1], profile[i].V[2] + sweep[0].V[2]);
+		//surface.VV.push_back(a);
+		cout << profile[i].V[0] << endl;
+	}
 
     // TODO: Here you should build the surface.  See surf.h for details.
 
