@@ -73,6 +73,8 @@ public:
 
 private:
 
+	void lineToJoint(std::string line);
+
 	// pointer to the root joint
 	Joint* m_rootJoint;
 	// the list of joints.
