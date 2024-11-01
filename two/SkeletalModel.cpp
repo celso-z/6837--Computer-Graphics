@@ -104,6 +104,36 @@ static void traverseJointHierarchy( Joint *root, MatrixStack stack){
 	glFlush();
 	for(int i = 0; i < root->children.size(); i++){
 		Joint *child = root->children[i];
+		traverseJointHierarchy(child, stack);	
+	}
+	stack.pop();
+}
+
+void SkeletalModel::drawJoints( )
+{
+	// Draw a sphere at each joint. You will need to add a recursive helper function to traverse the joint hierarchy.
+	//
+	// We recommend using glutSolidSphere( 0.025f, 12, 12 )
+	// to draw a sphere of reasonable size.
+	//
+	// You are *not* permitted to use the OpenGL matrix stack commands
+	// (glPushMatrix, glPopMatrix, glMultMatrix).
+	// You should use your MatrixStack class
+	// and use glLoadMatrix() before your drawing call.
+	
+	Matrix4f initial_matrix = Matrix4f();
+	glGetFloatv(GL_MODELVIEW_MATRIX, initial_matrix);
+	m_matrixStack = MatrixStack();
+	m_matrixStack.push(initial_matrix);
+	traverseJointHierarchy( this->m_rootJoint, m_matrixStack);
+							
+}
+
+static void traverseSkeletonHierarchy( Joint *root, MatrixStack stack){
+	stack.push(root->transform);
+
+	for(int i = 0; i < root->children.size(); i++){
+		Joint *child = root->children[i];
 		Vector4f homogeneousTranslation = child->transform.getCol(3);
 		float distL = Vector3f(homogeneousTranslation[0], homogeneousTranslation[1], homogeneousTranslation[2]).abs();
 		Matrix4f transform = Matrix4f(0.05f,0.0f,0.0f, 0.0f,
@@ -127,36 +157,18 @@ static void traverseJointHierarchy( Joint *root, MatrixStack stack){
 		glutSolidCube(1.0f);
 		stack.pop();
 		stack.pop();
-		traverseJointHierarchy(child, stack);	
+		traverseSkeletonHierarchy(child, stack);	
 	}
 	stack.pop();
-}
 
-void SkeletalModel::drawJoints( )
-{
-	// Draw a sphere at each joint. You will need to add a recursive helper function to traverse the joint hierarchy.
-	//
-	// We recommend using glutSolidSphere( 0.025f, 12, 12 )
-	// to draw a sphere of reasonable size.
-	//
-	// You are *not* permitted to use the OpenGL matrix stack commands
-	// (glPushMatrix, glPopMatrix, glMultMatrix).
-	// You should use your MatrixStack class
-	// and use glLoadMatrix() before your drawing call.
-	
-	Matrix4f initial_matrix = Matrix4f();
-	glGetFloatv(GL_MODELVIEW_MATRIX, initial_matrix);
-	m_matrixStack = MatrixStack();
-	m_matrixStack.push(initial_matrix);
-	traverseJointHierarchy( this->m_rootJoint, m_matrixStack);
-	
-	
-							
 }
 
 void SkeletalModel::drawSkeleton( )
 {
 	// Draw boxes between the joints. You will need to add a recursive helper function to traverse the joint hierarchy.
+	
+	//BUG! Only works as supposed if called after drawJoints
+	traverseSkeletonHierarchy( this->m_rootJoint, m_matrixStack);
 }
 
 void SkeletalModel::setJointTransform(int jointIndex, float rX, float rY, float rZ)
