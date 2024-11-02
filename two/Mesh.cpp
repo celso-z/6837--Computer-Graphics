@@ -50,6 +50,11 @@ void Mesh::draw()
 		Vector3f point1 = this->currentVertices[faces[i][0]];
 		Vector3f point2 = this->currentVertices[faces[i][1]];
 		Vector3f point3 = this->currentVertices[faces[i][2]];
+		Vector3f u = point2 - point1;
+		Vector3f v = point3 - point1;
+		Vector3f normal =  Vector3f::cross(u, v).normalized();
+
+        glNormal3f(normal[0], normal[1], normal[2]);
         glVertex3f(point1[0], point1[1], point1[2]);
         glVertex3f(point2[0], point2[1], point2[2]);
         glVertex3f(point3[0], point3[1], point3[2]);
