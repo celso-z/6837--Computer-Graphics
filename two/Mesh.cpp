@@ -67,4 +67,22 @@ void Mesh::loadAttachments( const char* filename, int numJoints )
 {
 	// 2.2. Implement this method to load the per-vertex attachment weights
 	// this method should update m_mesh.attachments
+	fstream fs;
+	string line;
+
+	fs.open(filename, fstream::in);
+	if(fs.fail()){
+		cerr << "Could not load Mesh, could not open file!" << endl;
+		exit(-1);
+	}
+	while(getline(fs, line)){
+		std::istringstream iss(line);
+		vector<float> att;
+		float weight = 0.0f;
+
+		while(iss >> weight){
+			att.push_back(weight);
+		}
+		this->attachments.push_back(att);
+	}
 }
